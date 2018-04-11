@@ -9,31 +9,31 @@
 import UIKit
 
 class ToDoListViewController: UITableViewController {
-
-    let itemArray = ["Climb Acouncagua", "Try skydiving", "Riding a scooter in Taiwan"]
-
+    
+    var itemArray = ["Getting a job as an iOS Developer", "Climb Acouncagua", "Try skydiving", "Riding a scooter in Taiwan"]
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
-
+    
     //Mark - TableView Datasource Methods
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
     }
-
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath) as! ToDoListTableViewCell
         cell.toDoListItemLabel.text = itemArray[indexPath.row]
         return cell
     }
-
+    
     //Mark - TableView Delegate Methods
-
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(itemArray[indexPath.row])
-
-
+        
+        
         if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
             tableView.cellForRow(at: indexPath)?.accessoryType = .none
         } else {
@@ -41,8 +41,25 @@ class ToDoListViewController: UITableViewController {
         }
         tableView.deselectRow(at: indexPath, animated: true)
     }
-
-
-
+    
+    //Mark - Add New Items
+    
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "Add New To Do Item", message: "", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+            self.itemArray.append(textField.text!)
+            self.tableView.reloadData()
+        }
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new item"
+            textField = alertTextField
+        }
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
+    }
 }
 
