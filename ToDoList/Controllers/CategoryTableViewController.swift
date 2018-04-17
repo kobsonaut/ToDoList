@@ -9,7 +9,8 @@
 import UIKit
 import RealmSwift
 
-class CategoryTableViewController: UITableViewController {
+
+class CategoryTableViewController: SwipeTableViewController {
 
     let realm = try! Realm()
 
@@ -49,9 +50,10 @@ class CategoryTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! CategoryTableViewCell
-        let category = toDoCategories?[indexPath.row]
-        cell.categoryLabel.text = category?.name ?? "No categories added."
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+
+        cell.textLabel?.text = toDoCategories?[indexPath.row].name ?? "No categories added."
+
         return cell
     }
 
@@ -60,6 +62,7 @@ class CategoryTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "goToItems", sender: self)
     }
+
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destinationVC = segue.destination as! ToDoListViewController
@@ -89,5 +92,22 @@ class CategoryTableViewController: UITableViewController {
 
         tableView.reloadData()
     }
+
+    //MARK: - Delete Data From Swipe
+
+    override func updateModel(at indexPath: IndexPath) {
+        if let category = self.toDoCategories?[indexPath.row] {
+
+            do {
+                try self.realm.write {
+                    self.realm.delete(category)
+                }
+            }
+            catch {
+                print("Error deleting object, \(error)")
+            }
+        }
+    }
+
 
 }
