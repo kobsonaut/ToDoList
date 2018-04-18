@@ -8,10 +8,14 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class ToDoListViewController: SwipeTableViewController {
     
     var toDoItems: Results<Item>?
+    let realm = try! Realm()
+
+    @IBOutlet weak var searchBar: UISearchBar!
 
     var selectedCategory: Category? {
         didSet {
@@ -19,11 +23,40 @@ class ToDoListViewController: SwipeTableViewController {
         }
     }
 
-    let realm = try! Realm()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // loadItems()
+        tableView.separatorStyle = .none
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        guard let colourHex = selectedCategory?.colour else { fatalError() }
+        updateNavBar(withHexCode: colourHex)
+        title = selectedCategory!.name
+
+
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        updateNavBar(withHexCode: "1D9BF6")
+    }
+
+    //MARK: - Nav Bar Setup Methods
+
+    func updateNavBar(withHexCode colourHexCode: String) {
+        
+        guard let navBar = navigationController?.navigationBar else { fatalError("Navigation controller doesn't exist")}
+
+        guard let navBarColour = UIColor(hexString: colourHexCode) else { fatalError() }
+
+        navBar.barTintColor = navBarColour
+
+        navBar.tintColor = UIColor(contrastingBlackOrWhiteColorOn: navBarColour, isFlat: true)
+
+        navBar.largeTitleTextAttributes = [NSAttributedStringKey.foregroundColor: UIColor(contrastingBlackOrWhiteColorOn: navBarColour, isFlat: true)]
+
+        searchBar.barTintColor = navBarColour
+
     }
     
     //MARK: - TableView Datasource Methods
@@ -38,6 +71,11 @@ class ToDoListViewController: SwipeTableViewController {
         if let item = toDoItems?[indexPath.row] {
 
             cell.textLabel?.text = item.title
+
+            if let colour = UIColor(hexString: selectedCategory!.colour)?.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(toDoItems!.count)) {
+                cell.backgroundColor = colour
+                cell.textLabel?.textColor = UIColor(contrastingBlackOrWhiteColorOn: colour, isFlat: true)
+            }
 
             cell.accessoryType = item.done ? .checkmark : .none
         } else {
@@ -128,7 +166,6 @@ class ToDoListViewController: SwipeTableViewController {
             }
         }
     }
-
 }
 
 //MARK: - Search bar methods
